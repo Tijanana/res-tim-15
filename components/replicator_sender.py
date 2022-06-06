@@ -1,37 +1,35 @@
+from components.replicator_receiver import ReplicatorReceiver
 from constants.datasets import DATASET
 from models.collection_description import CollectionDescription
+from models.receiver_property import ReceiverProperty
 
 
 class ReplicatorSender:
-    buffer = [
-        CollectionDescription(0, DATASET[1], []),
-        CollectionDescription(1, DATASET[2], []),
-        CollectionDescription(2, DATASET[3], []),
-        CollectionDescription(3, DATASET[4], [])
-    ]
+    buffer = []
 
     # From Writer
     @staticmethod
-    def ReceiveData(data):
+    def ReceiveData(data: ReceiverProperty):
         ReplicatorSender.__SaveData(data)
+        ReplicatorSender.__SendData()
 
     @staticmethod
-    def __SaveData(data):
-        dataset = ReplicatorSender.__IdentifyDataset(data)
-        for cd in ReplicatorSender.buffer:
-            if dataset == cd.dataset:
-                ReplicatorSender.buffer[cd.id].historical_collection.append(data)
-                return
+    def __SaveData(data: ReceiverProperty):
+        dataset, cd_id = ReplicatorSender.__IdentifyDataset(data)
+        collection_description = CollectionDescription(cd_id, dataset, [data, ])
+        ReplicatorSender.buffer.append(collection_description)
 
     @staticmethod
-    def __IdentifyDataset(data):
+    def __IdentifyDataset(data: ReceiverProperty):
+        cd_id = 0
         for dataset in DATASET.values():
             if data.code in dataset:
-                return dataset
+                return dataset, cd_id
+            cd_id += 1
 
     # To Replicator Receiver
     @staticmethod
-    def SendData():
-        # TODO: Implement
-        #  Send data to ReplicatorReceiver in format CollectionDescription
-        pass
+    def __SendData():
+        for cd in ReplicatorSender.buffer:
+            ReplicatorReceiver.ReceiveData(cd)
+        ReplicatorSender.buffer.clear()
