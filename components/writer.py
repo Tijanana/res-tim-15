@@ -11,7 +11,8 @@ class Writer:
     def __init__(self):
         self.activity = False
 
-    def Menu(self):
+    @staticmethod
+    def Menu():
         questions = [
             {
                 'type': 'list',
@@ -25,12 +26,13 @@ class Writer:
             answers = prompt.prompt(questions)
             selected_option = answers['option']
             if selected_option == 'Send data':
-                self.SendData()
+                Writer.SendData()
             elif selected_option == 'Exit writer':
                 break
 
     # To Replicator Sender
-    def SendData(self):
+    @staticmethod
+    def SendData():
         questions = [
             {
                 'type': 'list',
@@ -42,7 +44,7 @@ class Writer:
                 'type': 'input',
                 'name': 'value',
                 'message': 'Value',
-                'validate': lambda x: True if self.__ValidateValue(x) else 'Invalid value'
+                'validate': lambda x: True if Writer.__ValidateValue(x) else 'Invalid value'
             }
         ]
         answers = prompt.prompt(questions)
