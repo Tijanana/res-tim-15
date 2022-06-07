@@ -1,4 +1,7 @@
 import os
+import threading
+import time
+from random import randint
 
 from inquirer2 import prompt
 
@@ -26,13 +29,13 @@ class Writer:
             answers = prompt.prompt(questions)
             selected_option = answers['option']
             if selected_option == 'Send data':
-                Writer.SendData()
+                Writer.SendDataPrompt()
             elif selected_option == 'Exit writer':
                 break
 
     # To Replicator Sender
     @staticmethod
-    def SendData():
+    def SendDataPrompt():
         questions = [
             {
                 'type': 'list',
@@ -55,6 +58,20 @@ class Writer:
         os.system('cls' if os.name == 'nt' else 'clear')
         print('Data sent')
         input()
+
+    @staticmethod
+    def StartWriter():
+        new_thread = threading.Thread(target=Writer.__AutomaticallySendData)
+        new_thread.start()
+
+    @staticmethod
+    def __AutomaticallySendData():
+        while True:
+            time.sleep(2)
+            code = Code[Codes[randint(0, 7)]]
+            value = randint(1, 99999)
+            receiver_property = ReceiverProperty(code, value)
+            ReplicatorSender.ReceiveData(receiver_property)
 
     @staticmethod
     def __ValidateValue(value):
