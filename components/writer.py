@@ -11,8 +11,11 @@ from models.receiver_property import ReceiverProperty
 
 
 class Writer:
-    def __init__(self):
-        self.activity = False
+    terminate = False
+
+    def __init__(self, id):
+        self.id = id
+        self.activity = True
 
     @staticmethod
     def Menu():
@@ -29,13 +32,13 @@ class Writer:
             answers = prompt.prompt(questions)
             selected_option = answers['option']
             if selected_option == 'Send data':
-                Writer.SendDataPrompt()
+                Writer.__SendDataPrompt()
             elif selected_option == 'Exit writer':
                 break
 
     # To Replicator Sender
     @staticmethod
-    def SendDataPrompt():
+    def __SendDataPrompt():
         questions = [
             {
                 'type': 'list',
@@ -66,7 +69,7 @@ class Writer:
 
     @staticmethod
     def __AutomaticallySendData():
-        while True:
+        while True and not Writer.terminate:
             time.sleep(2)
             code = Code[Codes[randint(0, 7)]]
             value = randint(1, 99999)
@@ -87,3 +90,11 @@ class Writer:
             self.activity = not self.activity
         else:
             self.activity = new_state
+
+    def __str__(self):
+        activity = ''
+        if self.activity:
+            activity = 'On'
+        else:
+            activity = 'Off'
+        return f'Writer {self.id} {activity}'
