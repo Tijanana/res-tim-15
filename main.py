@@ -17,7 +17,7 @@ def main():
 def Execute():
     automatic_writer_thread = threading.Thread(target=Writer.StartWriter)
     automatic_writer_thread.start()
-    CreateWriter()
+    CreateWriter(show_result=False)
     Menu()
 
 
@@ -58,9 +58,32 @@ def ExecuteUserInput(user_input):
 
 # Select and use active writer
 def UseWriter():
-    # TODO: Implement
-    #  Implement
-    pass
+    selected_writer = SelectWriter()
+
+    if not selected_writer:
+        return
+
+    selected_writer.Menu()
+
+
+# Get list of names of all active writers
+def GetActiveWriterNames():
+    global writers
+    active_writer_names = []
+    for writer in writers:
+        if writer.activity:
+            active_writer_names.append(writer.__str__())
+
+    return active_writer_names
+
+
+# Convert writer name to writer object
+def IdentifyWriter(writer_name):
+    global writers
+    for writer in writers:
+        if writer.__str__() == writer_name:
+            return writer
+    return None
 
 
 # Prompts user to change writer states
@@ -71,10 +94,33 @@ def ManageWriters():
 
 
 # Creates new writer and
-def CreateWriter():
+def CreateWriter(show_result=True):
     # TODO: Implement
     #  Implement
     pass
+
+
+# Prompt user to select a writer
+def SelectWriter():
+    os.system('cls' if os.name == 'nt' else 'clear')
+    active_writers = GetActiveWriterNames()
+    if not active_writers:
+        print('No active writers')
+        input()
+        return
+
+    global writer_names
+    questions = [
+        {
+            'type': 'list',
+            'name': 'writer',
+            'message': 'Select writer',
+            'choices': active_writers
+        }
+    ]
+    answers = prompt.prompt(questions)
+    selected_writer = IdentifyWriter(answers['writer'])
+    return selected_writer
 
 
 if __name__ == '__main__':
