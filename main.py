@@ -77,6 +77,15 @@ def GetActiveWriterNames():
     return active_writer_names
 
 
+# Convert writer names to writer objects
+def IdentifyWriters(writers_to_identify):
+    identified_writers = []
+    for writer_name in writers_to_identify:
+        identified_writers.append(IdentifyWriter(writer_name))
+
+    return identified_writers
+
+
 # Convert writer name to writer object
 def IdentifyWriter(writer_name):
     global writers
@@ -88,16 +97,48 @@ def IdentifyWriter(writer_name):
 
 # Prompts user to change writer states
 def ManageWriters():
-    # TODO: Implement
-    #  Implement
-    pass
+    writers_to_change = SelectWriters()
+
+    if not writers_to_change:
+        return
+
+    for writer in writers_to_change:
+        writer.SwitchState()
+
+
+# Gets writer names adapted for inquirer2 checkbox
+def GetCheckboxWriters():
+    global writers
+    checkbox_writer_names = []
+    for writer in writers:
+        checkbox_writer_names.append({'name': writer.__str__()})
+
+    return checkbox_writer_names
 
 
 # Creates new writer and
 def CreateWriter(show_result=True):
-    # TODO: Implement
-    #  Implement
-    pass
+    new_writer = GenerateWriter()
+    AddWriter(new_writer)
+
+    if show_result:
+        print(f'{new_writer} created successfully')
+        input()
+
+
+# Generates new writer
+def GenerateWriter():
+    os.system('cls' if os.name == 'nt' else 'clear')
+    new_writer = Writer(next_writer_id)
+    return new_writer
+
+
+# Adds writer to data
+def AddWriter(writer):
+    global next_writer_id
+    next_writer_id += 1
+    writers.append(writer)
+    writer_names.append(writer.__str__())
 
 
 # Prompt user to select a writer
@@ -121,6 +162,27 @@ def SelectWriter():
     answers = prompt.prompt(questions)
     selected_writer = IdentifyWriter(answers['writer'])
     return selected_writer
+
+
+# Prompt user to select multiple writers
+def SelectWriters():
+    os.system('cls' if os.name == 'nt' else 'clear')
+    checkbox_writer_names = GetCheckboxWriters()
+    questions = [
+        {
+            'type': 'checkbox',
+            'name': 'writers',
+            'message': 'Select writers to switch state',
+            'choices': checkbox_writer_names
+        }
+    ]
+    answers = prompt.prompt(questions)
+    writers_to_change = answers['writers']
+    if not writers_to_change:
+        return
+
+    writers_to_change = IdentifyWriters(writers_to_change)
+    return writers_to_change
 
 
 if __name__ == '__main__':
