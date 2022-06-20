@@ -1,9 +1,14 @@
 import os
+import re
 import threading
 
 from inquirer2 import prompt
 
+from components.logger import Logger
+from components.replicator_receiver import ReplicatorReceiver
 from components.writer import Writer
+from constants.codes import Codes
+from constants.readers import readers
 
 writers = []
 writer_names = []
@@ -15,8 +20,12 @@ def main():
 
 
 def Execute():
+    automatic_replicator_receiver_thread = threading.Thread(target=ReplicatorReceiver.SendData)
     automatic_writer_thread = threading.Thread(target=Writer.StartWriter)
+    logger_writer_thread = threading.Thread(target=Logger.StartLogger)
+    automatic_replicator_receiver_thread.start()
     automatic_writer_thread.start()
+    logger_writer_thread.start()
     CreateWriter(show_result=False)
     Menu()
 
@@ -35,7 +44,11 @@ def GetUserInput():
             'type': 'list',
             'name': 'menu',
             'message': 'Select option',
-            'choices': ['Use writer', 'Turn On/Off writers', 'Create new writer', 'Exit']
+            'choices': ['Use writer',
+                        'Get values for code in a time interval',
+                        'Turn On/Off writers',
+                        'Create new writer',
+                        'Exit']
         }
     ]
     answers = prompt.prompt(questions)
@@ -46,13 +59,17 @@ def GetUserInput():
 def ExecuteUserInput(user_input):
     if user_input == 'Use writer':
         UseWriter()
+    elif user_input == 'Get values for code in a time interval':
+        GetValuesByInterval()
     elif user_input == 'Turn On/Off writers':
         ManageWriters()
     elif user_input == 'Create new writer':
         CreateWriter()
     elif user_input == 'Exit':
         os.system('cls' if os.name == 'nt' else 'clear')
+        print('Shutting down...')
         Writer.terminate = True
+        ReplicatorReceiver.terminate = True
         exit()
 
 
@@ -93,6 +110,73 @@ def IdentifyWriter(writer_name):
         if writer.__str__() == writer_name:
             return writer
     return None
+
+
+def GetValuesByInterval():
+    questions = [
+        {
+            'type': 'list',
+            'name': 'code',
+            'message': 'Code',
+            'choices': Codes,
+        },
+        {
+            'type': 'input',
+            'name': 'start_date',
+            'message': 'Enter start date: (YYYY-MM-DD)',
+            'validate': lambda x: True if ValidateRegex(x, '^[0-9]{4}-[0-9]{2}-[0-9]{2}$') else 'Invalid'
+        },
+        {
+            'type': 'input',
+            'name': 'start_time',
+            'message': 'Enter start time: (HH:MM-SS)',
+            'validate': lambda x: True if ValidateRegex(x, '^[0-9]{2}:[0-9]{2}:[0-9]{2}$') else 'Invalid'
+        },
+        {
+            'type': 'input',
+            'name': 'end_date',
+            'message': 'Enter end date: (YYYY-MM-DD)',
+            'validate': lambda x: True if ValidateRegex(x, '^[0-9]{4}-[0-9]{2}-[0-9]{2}$') else 'Invalid'
+        },
+        {
+            'type': 'input',
+            'name': 'end_time',
+            'message': 'Enter end time: (HH:MM-SS)',
+            'validate': lambda x: True if ValidateRegex(x, '^[0-9]{2}:[0-9]{2}:[0-9]{2}$') else 'Invalid'
+        }
+    ]
+    answers = prompt.prompt(questions)
+    code = answers['code']
+    s_date = answers['start_date']
+    s_time = answers['start_time']
+    e_date = answers['end_date']
+    e_time = answers['end_time']
+    dataset = MapCodeToDataset(code)
+    reader = readers[dataset]
+    values = reader.GetValuesByInterval(code, s_date, s_time, e_date, e_time)
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print('Values:')
+    for value in values:
+        print(f'\t{value}')
+    input()
+
+
+def ValidateRegex(user_input, regex):
+    if re.match(regex, user_input):
+        return True
+    else:
+        return False
+
+
+def MapCodeToDataset(code):
+    if code in ['CODE_ANALOG', 'CODE_DIGITAL']:
+        return 1
+    elif code in ['CODE_CUSTOM', 'CODE_LIMITSET']:
+        return 2
+    elif code in ['CODE_SINGLENOE', 'CODE_MULTIPLENODE']:
+        return 3
+    elif code in ['CODE_CONSUMER', 'CODE_SOURCE']:
+        return 4
 
 
 # Prompts user to change writer states

@@ -1,10 +1,10 @@
 import os
-import threading
 import time
 from random import randint
 
 from inquirer2 import prompt
 
+from components.logger import Logger
 from components.replicator_sender import ReplicatorSender
 from constants.codes import Codes, Code
 from models.receiver_property import ReceiverProperty
@@ -17,8 +17,7 @@ class Writer:
         self.id = id
         self.activity = True
 
-    @staticmethod
-    def Menu():
+    def Menu(self):
         questions = [
             {
                 'type': 'list',
@@ -32,13 +31,12 @@ class Writer:
             answers = prompt.prompt(questions)
             selected_option = answers['option']
             if selected_option == 'Send data':
-                Writer.__SendDataPrompt()
+                self.__SendDataPrompt()
             elif selected_option == 'Exit writer':
                 break
 
     # To Replicator Sender
-    @staticmethod
-    def __SendDataPrompt():
+    def __SendDataPrompt(self):
         questions = [
             {
                 'type': 'list',
@@ -58,14 +56,14 @@ class Writer:
         value = int(answers['value'])
         data = ReceiverProperty(code, value)
         ReplicatorSender.ReceiveData(data)
+        Logger.LogAction(f"[{self.__str__()}] Sent {data}")
         os.system('cls' if os.name == 'nt' else 'clear')
         print('Data sent')
         input()
 
     @staticmethod
     def StartWriter():
-        new_thread = threading.Thread(target=Writer.__AutomaticallySendData)
-        new_thread.start()
+        Writer.__AutomaticallySendData()
 
     @staticmethod
     def __AutomaticallySendData():
@@ -75,6 +73,7 @@ class Writer:
             value = randint(1, 99999)
             receiver_property = ReceiverProperty(code, value)
             ReplicatorSender.ReceiveData(receiver_property)
+            Logger.LogAction(f"[Automatic Writer] Sent {receiver_property}")
 
     @staticmethod
     def __ValidateValue(value):

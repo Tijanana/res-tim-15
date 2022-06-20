@@ -1,3 +1,4 @@
+from components.logger import Logger
 from components.replicator_receiver import ReplicatorReceiver
 from constants.datasets import DATASET
 from models.collection_description import CollectionDescription
@@ -32,4 +33,5 @@ class ReplicatorSender:
     def __SendData():
         for cd in ReplicatorSender.buffer:
             ReplicatorReceiver.ReceiveData(cd)
+            Logger.LogAction(f"[Replicator Sender] Forwarded dataset {cd.id}")
         ReplicatorSender.buffer.clear()
