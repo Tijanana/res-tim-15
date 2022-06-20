@@ -1,7 +1,9 @@
+import time
 from random import randint
 
-from components.reader import Reader
+from components.logger import Logger
 from constants.datasets import DATASET
+from constants.readers import readers
 from models.collection_description import CollectionDescription
 from models.delta_cd import DeltaCD
 
@@ -20,6 +22,7 @@ class ReplicatorReceiver:
         False
     ]
     delta_cd = DeltaCD([], [])
+    terminate = False
 
     # From Replicator Sender
     @staticmethod
@@ -30,9 +33,11 @@ class ReplicatorReceiver:
     # To available Reader
     @staticmethod
     def SendData():
-        ReplicatorReceiver.__EvaluateBufferStatus()
-        ReplicatorReceiver.__PrepareData()
-        ReplicatorReceiver.__SendPreparedData()
+        while True and not ReplicatorReceiver.terminate:
+            time.sleep(2)
+            ReplicatorReceiver.__EvaluateBufferStatus()
+            ReplicatorReceiver.__PrepareData()
+            ReplicatorReceiver.__SendPreparedData()
 
     @staticmethod
     def __EvaluateBufferStatus():
@@ -63,10 +68,16 @@ class ReplicatorReceiver:
 
     @staticmethod
     def __SendPreparedData():
-        if len(ReplicatorReceiver.delta_cd.add) + len(ReplicatorReceiver.delta_cd.update) != 10:
+        if len(ReplicatorReceiver.delta_cd.add) + len(ReplicatorReceiver.delta_cd.update) < 10:
             return
 
         for cd in ReplicatorReceiver.delta_cd.add:
-            Reader.SaveData(cd)
+            reader = readers[cd.id + 1]
+            reader.SaveData(cd)
+            Logger.LogAction(f"[Replicator Receiver] Forwarded dataset {cd.id}")
+            ReplicatorReceiver.delta_cd.add.clear()
         for cd in ReplicatorReceiver.delta_cd.update:
-            Reader.SaveData(cd)
+            reader = readers[cd.id + 1]
+            reader.SaveData(cd)
+            Logger.LogAction(f"[Replicator Receiver] Forwarded dataset {cd.id}")
+            ReplicatorReceiver.delta_cd.update.clear()
