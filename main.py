@@ -15,11 +15,11 @@ writer_names = []
 next_writer_id = 1
 
 
-def main():
+def main():  # pragma: no cover
     Execute()
 
 
-def Execute():
+def Execute():  # pragma: no cover
     automatic_replicator_receiver_thread = threading.Thread(target=ReplicatorReceiver.SendData)
     automatic_writer_thread = threading.Thread(target=Writer.StartWriter)
     logger_writer_thread = threading.Thread(target=Logger.StartLogger)
@@ -30,7 +30,7 @@ def Execute():
     Menu()
 
 
-def Menu():
+def Menu():  # pragma: no cover
     while True:
         user_input = GetUserInput()
         ExecuteUserInput(user_input)
@@ -56,7 +56,7 @@ def GetUserInput():
 
 
 # Executes selected action
-def ExecuteUserInput(user_input):
+def ExecuteUserInput(user_input):  # pragma: no cover
     if user_input == 'Use writer':
         UseWriter()
     elif user_input == 'Get values for code in a time interval':
@@ -74,7 +74,7 @@ def ExecuteUserInput(user_input):
 
 
 # Select and use active writer
-def UseWriter():
+def UseWriter():  # pragma: no cover
     selected_writer = SelectWriter()
 
     if not selected_writer:
@@ -112,7 +112,7 @@ def IdentifyWriter(writer_name):
     return None
 
 
-def GetValuesByInterval():
+def GetValuesByInterval():  # pragma: no cover
     questions = [
         {
             'type': 'list',
@@ -180,7 +180,7 @@ def MapCodeToDataset(code):
 
 
 # Prompts user to change writer states
-def ManageWriters():
+def ManageWriters():  # pragma: no cover
     writers_to_change = SelectWriters()
 
     if not writers_to_change:
@@ -191,7 +191,7 @@ def ManageWriters():
 
 
 # Gets writer names adapted for inquirer2 checkbox
-def GetCheckboxWriters():
+def GetCheckboxWriters():  # pragma: no cover
     global writers
     checkbox_writer_names = []
     for writer in writers:
@@ -201,7 +201,7 @@ def GetCheckboxWriters():
 
 
 # Creates new writer and
-def CreateWriter(show_result=True):
+def CreateWriter(show_result=True):  # pragma: no cover
     new_writer = GenerateWriter()
     AddWriter(new_writer)
 
@@ -218,7 +218,7 @@ def GenerateWriter():
 
 
 # Adds writer to data
-def AddWriter(writer):
+def AddWriter(writer):  # pragma: no cover
     global next_writer_id
     next_writer_id += 1
     writers.append(writer)
@@ -249,7 +249,7 @@ def SelectWriter():
 
 
 # Prompt user to select multiple writers
-def SelectWriters():
+def SelectWriters():  # pragma: no cover
     os.system('cls' if os.name == 'nt' else 'clear')
     checkbox_writer_names = GetCheckboxWriters()
     questions = [
@@ -269,5 +269,5 @@ def SelectWriters():
     return writers_to_change
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     main()

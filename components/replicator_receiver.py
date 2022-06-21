@@ -26,21 +26,24 @@ class ReplicatorReceiver:
 
     # From Replicator Sender
     @staticmethod
-    def ReceiveData(collection_description: CollectionDescription):
+    def ReceiveData(collection_description: CollectionDescription):  # pragma: no cover
         for receiver_property in collection_description.historical_collection:
             ReplicatorReceiver.buffer[collection_description.id].historical_collection.append(receiver_property)
 
     # To available Reader
     @staticmethod
-    def SendData():
+    def SendData():  # pragma: no cover
         while True and not ReplicatorReceiver.terminate:
             time.sleep(2)
-            ReplicatorReceiver.__EvaluateBufferStatus()
+            there_is_ready_data = ReplicatorReceiver.EvaluateBufferStatus()
+            if there_is_ready_data:
+                Logger.LogAction(f"[Info]: There is data ready to be saved")
             ReplicatorReceiver.__PrepareData()
             ReplicatorReceiver.__SendPreparedData()
 
     @staticmethod
-    def __EvaluateBufferStatus():
+    def EvaluateBufferStatus():
+        there_is_ready_data = False
         code_1_present = False
         code_2_present = False
         for cd in ReplicatorReceiver.buffer:
@@ -51,11 +54,13 @@ class ReplicatorReceiver:
                     code_2_present = True
             if code_1_present and code_2_present:
                 ReplicatorReceiver.buffer_contents_send_status[cd.id] = True
+                there_is_ready_data = True
             else:
                 ReplicatorReceiver.buffer_contents_send_status[cd.id] = False
+        return there_is_ready_data
 
     @staticmethod
-    def __PrepareData():
+    def __PrepareData():  # pragma: no cover
         for cd in ReplicatorReceiver.buffer:
             if not ReplicatorReceiver.buffer_contents_send_status[cd.id]:
                 continue
@@ -67,7 +72,7 @@ class ReplicatorReceiver:
                 ReplicatorReceiver.delta_cd.update.append(cd)
 
     @staticmethod
-    def __SendPreparedData():
+    def __SendPreparedData():  # pragma: no cover
         if len(ReplicatorReceiver.delta_cd.add) + len(ReplicatorReceiver.delta_cd.update) < 10:
             return
 

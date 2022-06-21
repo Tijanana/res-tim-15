@@ -13,11 +13,11 @@ from models.receiver_property import ReceiverProperty
 class Writer:
     terminate = False
 
-    def __init__(self, id):
+    def __init__(self, id):  # pragma: no cover
         self.id = id
         self.activity = True
 
-    def Menu(self):
+    def Menu(self):  # pragma: no cover
         questions = [
             {
                 'type': 'list',
@@ -36,7 +36,7 @@ class Writer:
                 break
 
     # To Replicator Sender
-    def __SendDataPrompt(self):
+    def __SendDataPrompt(self):  # pragma: no cover
         questions = [
             {
                 'type': 'list',
@@ -48,7 +48,7 @@ class Writer:
                 'type': 'input',
                 'name': 'value',
                 'message': 'Value',
-                'validate': lambda x: True if Writer.__ValidateValue(x) else 'Invalid value'
+                'validate': lambda x: True if Writer.ValidateValue(x) else 'Invalid value'
             }
         ]
         answers = prompt.prompt(questions)
@@ -62,11 +62,11 @@ class Writer:
         input()
 
     @staticmethod
-    def StartWriter():
+    def StartWriter():  # pragma: no cover
         Writer.__AutomaticallySendData()
 
     @staticmethod
-    def __AutomaticallySendData():
+    def __AutomaticallySendData():  # pragma: no cover
         while True and not Writer.terminate:
             time.sleep(2)
             code = Code[Codes[randint(0, 7)]]
@@ -76,7 +76,7 @@ class Writer:
             Logger.LogAction(f"[Automatic Writer] Sent {receiver_property}")
 
     @staticmethod
-    def __ValidateValue(value):
+    def ValidateValue(value):
         try:
             if (int(value)) > 0:
                 return True
@@ -90,7 +90,7 @@ class Writer:
         else:
             self.activity = new_state
 
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         activity = ''
         if self.activity:
             activity = 'On'

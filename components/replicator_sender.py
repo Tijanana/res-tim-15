@@ -10,27 +10,30 @@ class ReplicatorSender:
 
     # From Writer
     @staticmethod
-    def ReceiveData(data: ReceiverProperty):
+    def ReceiveData(data: ReceiverProperty):  # pragma: no cover
         ReplicatorSender.__SaveData(data)
         ReplicatorSender.__SendData()
 
     @staticmethod
-    def __SaveData(data: ReceiverProperty):
-        dataset, cd_id = ReplicatorSender.__IdentifyDataset(data)
+    def __SaveData(data: ReceiverProperty):  # pragma: no cover
+        dataset, cd_id = ReplicatorSender.IdentifyDataset(data)
         collection_description = CollectionDescription(cd_id, dataset, [data, ])
         ReplicatorSender.buffer.append(collection_description)
 
     @staticmethod
-    def __IdentifyDataset(data: ReceiverProperty):
-        cd_id = 0
-        for dataset in DATASET.values():
-            if data.code in dataset:
-                return dataset, cd_id
-            cd_id += 1
+    def IdentifyDataset(data: ReceiverProperty):
+        try:
+            cd_id = 0
+            for dataset in DATASET.values():
+                if data.code in dataset:
+                    return dataset, cd_id
+                cd_id += 1
+        except:
+            return False
 
     # To Replicator Receiver
     @staticmethod
-    def __SendData():
+    def __SendData():  # pragma: no cover
         for cd in ReplicatorSender.buffer:
             ReplicatorReceiver.ReceiveData(cd)
             Logger.LogAction(f"[Replicator Sender] Forwarded dataset {cd.id}")
