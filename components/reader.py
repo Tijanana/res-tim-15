@@ -11,7 +11,7 @@ class Reader:
     def __init__(self, processable_dataset):
         self.processable_dataset = processable_dataset
 
-    def SaveData(self, data: CollectionDescription):
+    def SaveData(self, data: CollectionDescription):  # pragma: no cover
         for value in data.historical_collection:
             if value.code == 'CODE_DIGITAL':
                 self.SaveValue(value)
@@ -98,5 +98,5 @@ class Reader:
                 f"[Error]: Failed get data for {code} in interval {start_interval_date} {start_interval_time} - {end_interval_date} {end_interval_time}")
             return None
 
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return f'Reader {self.processable_dataset}'
